@@ -9,7 +9,7 @@ bcolors = {
     "UNDERLINE": '\033[4m'
 }
 
+
 def print_color(string, color):
     """ To print the strings in color """
     print(f"{bcolors[color]}{string}{bcolors['ENDC']}")
-

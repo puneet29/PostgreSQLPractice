@@ -1,7 +1,7 @@
+import psycopg2
 from config import config
 from utils import print_color
 
-import psycopg2
 
 def connect():
     """ Connect to the PostgreSQL database server"""
@@ -17,6 +17,7 @@ def connect():
     finally:
         return conn
 
+
 def disconnect(conn):
     """ Disconnect PostgreSQL database server """
     if conn is None:
@@ -24,6 +25,7 @@ def disconnect(conn):
 
     conn.close()
     print("Database connection closed")
+
 
 def print_version(conn):
     """ Print the version of PostgreSQL running """
@@ -40,6 +42,7 @@ def print_version(conn):
 
     # Close the communication with the PostgreSQL
     cur.close()
+
 
 def run_commands(conn, commands):
     """ Running SQL commands in PostgreSQL database """
@@ -59,6 +62,7 @@ def run_commands(conn, commands):
 
     # Commit the changes
     conn.commit()
+
 
 def parse_commands(conn, pairings):
     """ Parse commands """
@@ -87,24 +91,24 @@ def parse_commands(conn, pairings):
 if __name__ == "__main__":
     try:
         conn = connect()
-        
+
         if conn is None:
             raise Exception("Configuration for the database is invalid.")
-        
+
         print("Database connected opened")
-        
+
         # To print the version of database
         # print_version(conn)
-        
+
         # ------------------- COMMAND USAGE --------------------
         drop_commands = [
-                """
+            """
                 DROP TABLE IF EXISTS cars
                 """
-                ]
+        ]
 
         create_commands = [
-                """
+            """
                 CREATE TABLE cars(
                     id BIGSERIAL PRIMARY KEY,
                     make VARCHAR(50) NOT NULL,
@@ -112,7 +116,7 @@ if __name__ == "__main__":
                     year INTERVAL YEAR NOT NULL
                 )
                 """
-                ]
+        ]
 
         run_commands(conn, drop_commands)
         run_commands(conn, create_commands)
@@ -121,50 +125,59 @@ if __name__ == "__main__":
         print("Running dict commands...")
 
         # -------------------- DICT USAGE ----------------------
-        drop_pairings = [{'type': 'drop_table', 'table_name': 'cars', 'if_exists': True},
-                {'type': 'drop_table', 'table_name': 'bikes', 'if_exists': True}
-                ]
-        
+        drop_pairings = [
+            {
+                'type': 'drop_table',
+                'table_name': 'cars',
+                'if_exists': True
+            },
+            {
+                'type': 'drop_table',
+                'table_name': 'bikes',
+                'if_exists': True
+            }
+        ]
+
         create_pairings = [
-                            {
-                                'type': 'create_table',
-                                'table_name': 'cars', 
-                                'columns': [
-                                    {
-                                        'name': 'id', 
-                                        'type': 'BIGSERIAL',
-                                        'constraints': [
-                                                'PRIMARY KEY'
-                                            ]
-                                        },
-                                    {
-                                        'name': 'make',
-                                        'type': 'VARCHAR(50)',
-                                        'constraints': [
-                                                'NOT NULL'
-                                            ]
-                                        },
-                                    {
-                                        'name': 'model',
-                                        'type': 'VARCHAR(50)',
-                                        'constraints': [
-                                                'NOT NULL'
-                                            ]
-                                        },
-                                    {
-                                        'name': 'year',
-                                        'type': 'INTERVAL YEAR',
-                                        'constraints': [
-                                                'NOT NULL'
-                                            ]
-                                        }
-                                ]
-                            }
+            {
+                'type': 'create_table',
+                'table_name': 'cars',
+                'columns': [
+                    {
+                        'name': 'id',
+                        'type': 'BIGSERIAL',
+                        'constraints': [
+                            'PRIMARY KEY'
                         ]
+                    },
+                    {
+                        'name': 'make',
+                        'type': 'VARCHAR(50)',
+                        'constraints': [
+                            'NOT NULL'
+                        ]
+                    },
+                    {
+                        'name': 'model',
+                        'type': 'VARCHAR(50)',
+                        'constraints': [
+                            'NOT NULL'
+                        ]
+                    },
+                    {
+                        'name': 'year',
+                        'type': 'INTERVAL YEAR',
+                        'constraints': [
+                            'NOT NULL'
+                        ]
+                    }
+                ]
+            }
+        ]
 
         drop_cmds = parse_commands(conn, drop_pairings)
         create_cmds = parse_commands(conn, create_pairings)
-        
+
         run_commands(conn, drop_cmds)
         run_commands(conn, create_cmds)
         # ------------------------------------------------------
@@ -172,4 +185,3 @@ if __name__ == "__main__":
         disconnect(conn)
     except (Exception, psycopg2.DatabaseError) as error:
         print_color(error, "FAIL")
-

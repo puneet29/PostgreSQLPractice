@@ -6,3 +6,7 @@ database.ini
 
 # Python files
 __pycache__
+
+# VSCode Config
+.vscode
+
