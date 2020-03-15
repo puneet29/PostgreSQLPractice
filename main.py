@@ -23,7 +23,7 @@ def disconnect(conn):
         return
 
     conn.close()
-    print_color("Database connection closed", "OKGREEN")
+    print("Database connection closed")
 
 def print_version(conn):
     """ Print the version of PostgreSQL running """
@@ -46,13 +46,13 @@ def run_commands(conn, commands):
     # Create a cursor
     cur = conn.cursor()
 
-    print("Running commands...")
+    print_color("Running commands...", "WARNING")
 
     # Run commands one by one
     for command in commands:
         cur.execute(command)
 
-    print("Commands ran successfully!")
+    print_color("Commands ran successfully!", "OKGREEN")
 
     # Close communication with tht PostgreSQL database server
     cur.close()
@@ -68,7 +68,7 @@ if __name__ == "__main__":
         if conn is None:
             raise Exception("Configuration for the database is invalid.")
         
-        print_color("Database connected opened", "OKGREEN")
+        print("Database connected opened")
         
         # To print the version of database
         # print_version(conn)
@@ -76,7 +76,7 @@ if __name__ == "__main__":
         # To drop tables
         drop_commands = [
                 """
-                DROP TABLE cars
+                DROP TABLE IF EXISTS cars
                 """
                 ]
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
                     id BIGSERIAL PRIMARY KEY,
                     make VARCHAR(50) NOT NULL,
                     model VARCHAR(50) NOT NULL,
-                    year DATE NOT NULL
+                    year INTERVAL YEAR NOT NULL
                 )
                 """
                 ]
