@@ -60,7 +60,30 @@ def run_commands(conn, commands):
     # Commit the changes
     conn.commit()
 
-    
+def parse_commands(conn, pairings):
+    """ Parse commands """
+    cmd = []
+    for pairing in pairings:
+        if pairing["type"] == "create_table":
+            temp = f"CREATE TABLE {pairing['table_name']}("
+            for i, column in enumerate(pairing["columns"]):
+                temp += f"{column['name']} {column['type']}"
+                for constraint in column["constraints"]:
+                    temp += f" {constraint}"
+                if i != len(pairing["columns"]) - 1:
+                    temp += ","
+                else:
+                    temp += ")"
+            cmd.append(temp)
+        elif pairing["type"] == "drop_table":
+            temp = f"DROP TABLE"
+            if pairing["if_exists"]:
+                temp += " IF EXISTS"
+            temp += f" {pairing['table_name']}"
+            cmd.append(temp)
+    return cmd
+
+
 if __name__ == "__main__":
     try:
         conn = connect()
@@ -73,14 +96,13 @@ if __name__ == "__main__":
         # To print the version of database
         # print_version(conn)
         
-        # To drop tables
+        # ------------------- COMMAND USAGE --------------------
         drop_commands = [
                 """
                 DROP TABLE IF EXISTS cars
                 """
                 ]
 
-        # To create tables
         create_commands = [
                 """
                 CREATE TABLE cars(
@@ -94,6 +116,58 @@ if __name__ == "__main__":
 
         run_commands(conn, drop_commands)
         run_commands(conn, create_commands)
+        # ------------------------------------------------------
+
+        print("Running dict commands...")
+
+        # -------------------- DICT USAGE ----------------------
+        drop_pairings = [{'type': 'drop_table', 'table_name': 'cars', 'if_exists': True},
+                {'type': 'drop_table', 'table_name': 'bikes', 'if_exists': True}
+                ]
+        
+        create_pairings = [
+                            {
+                                'type': 'create_table',
+                                'table_name': 'cars', 
+                                'columns': [
+                                    {
+                                        'name': 'id', 
+                                        'type': 'BIGSERIAL',
+                                        'constraints': [
+                                                'PRIMARY KEY'
+                                            ]
+                                        },
+                                    {
+                                        'name': 'make',
+                                        'type': 'VARCHAR(50)',
+                                        'constraints': [
+                                                'NOT NULL'
+                                            ]
+                                        },
+                                    {
+                                        'name': 'model',
+                                        'type': 'VARCHAR(50)',
+                                        'constraints': [
+                                                'NOT NULL'
+                                            ]
+                                        },
+                                    {
+                                        'name': 'year',
+                                        'type': 'INTERVAL YEAR',
+                                        'constraints': [
+                                                'NOT NULL'
+                                            ]
+                                        }
+                                ]
+                            }
+                        ]
+
+        drop_cmds = parse_commands(conn, drop_pairings)
+        create_cmds = parse_commands(conn, create_pairings)
+        
+        run_commands(conn, drop_cmds)
+        run_commands(conn, create_cmds)
+        # ------------------------------------------------------
 
         disconnect(conn)
     except (Exception, psycopg2.DatabaseError) as error:
