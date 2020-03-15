@@ -1,8 +1,8 @@
 # Virtual environment
 .venv
 
-# Settings file
-settings.py
+# Database config file
+database.ini
 
 # Python files
 __pycache__
